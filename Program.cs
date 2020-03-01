@@ -10,7 +10,7 @@ namespace excel_parser
 {
     class Program
     {
-        public static string[] arr = new string[8] { "~р-он", "~р-н", "~р/н", "~г.", "~с.", "~п.г.т.", "~р.п.", "~п." };
+        public static string[] arr = new string[10] { "~р-он", "~р-н", "~р/н", "~район,", "~г.", "~с.", "~п.г.т.", "~р.п.", "~п.", "~пос." };
 
         static void Main(string[] args)
         {
@@ -44,7 +44,7 @@ namespace excel_parser
 
             for (int i = 0; i < words.Length; i++)
             {
-                Console.WriteLine(words[i]);
+               // Console.WriteLine(words[i]);
                 //Поиск по элементу из массива arr
                 var str = arr.FirstOrDefault(x => words[i].Contains(x));
                 if (str != null)
@@ -53,25 +53,32 @@ namespace excel_parser
                     if (str == arr[0] || str == arr[1] || str == arr[2])
                     {
                         result = words[i - 1].Substring(1) + " " + result + " " + words[i + 1].Substring(1);
+                        
+                        if (words[i + 2].Substring(1).Take(1).All(Char.IsUpper)) { result = result + " " + words[i + 2].Substring(1); }
                     }
-                    Console.WriteLine("!!!!!!!");
+                  //  Console.WriteLine("!!!!!!!");
                     break;
                 }
                 //Поиск по наименованию из БД DBList
                 else
                 {
-                    var str2 = DBList.FirstOrDefault(x => words[i].Contains(x));
+                    var str2 = DBList.FirstOrDefault(x => x == words[i]);
                     if (str2 != null)
                     {
                         result = words[i].Substring(1);
-                        Console.WriteLine("!!!");
+                        try
+                        {
+                            if (words[i + 1].Substring(1).Take(1).All(Char.IsUpper)) { result = result + " " + words[i + 1].Substring(1); }
+                        }
+                        catch (Exception exeption) { break; }
+                        finally {}
                         break;
-                    }
-                    else { Console.WriteLine("Неизвестно"); }
+                        //  Console.WriteLine("!!!");                        
+                    }                    
                 }
+                result = "Неизвестно";
             }
-
-            Console.WriteLine();
+           // Console.WriteLine();
             Console.WriteLine(result);
             Console.ReadLine();
             return result;
