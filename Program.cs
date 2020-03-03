@@ -22,9 +22,9 @@ namespace excel_parser
         public static void DataReader(List<string> DBList)
         {
             var a = 1;
-            string pathData = @"D:\KursRep\excel_parser\rtt8.txt";
-            // string pathData = @"D:\KursRep\excel_parser\test.txt";
-            string pathToSave = @"D:\KursRep\excel_parser\out8.txt";
+            string pathData = @"C:\Users\deamo\source\repos\excel_parser\rtt8.txt";
+         //   string pathData = @"C:\Users\deamo\source\repos\excel_parser\test.txt";
+            string pathToSave = @"C:\Users\deamo\source\repos\excel_parser\out8.txt";
             string Output = string.Empty;
             var results = new List<string>();
             using (StreamReader sr = new StreamReader(pathData))
@@ -37,7 +37,7 @@ namespace excel_parser
                     var dis = SearchDistrict(lineData);
                     var settl = SearchSettlement(lineData, DBList);
                     var result = dis + " " + settl;
-                    Console.WriteLine(lineData);
+                 //   Console.WriteLine(lineData);
                     Console.WriteLine();
                     Console.WriteLine(result);
                     //Console.ReadLine();
@@ -96,17 +96,20 @@ namespace excel_parser
             var result = string.Empty;
             var str2 = string.Empty;
             var str1 = string.Empty;
+            var str = string.Empty;
             var words = LineHandler(line);
             var wordsDB = LineHandler(line, '.');
 
-
             //Поиск по наименованию из БД DBList
-            str2 = DBList.FirstOrDefault(x => line.Contains(x));
-            if (str2==null) str2 = string.Empty;
-
+            for(int i = 0; i < wordsDB.Length; i++)
+            {
+                str2 = DBList.FirstOrDefault(x => x == wordsDB[i]);
+                if (str2 == null) str2 = string.Empty;
+            }
+                        
             for (int i = 0; i < words.Length; i++)
             {
-                var str = arrNP.FirstOrDefault(x => words[i].Contains(x));
+                str = arrNP.FirstOrDefault(x => words[i].Contains(x));
                 if (str != null)
                 {
                     result = words[i].Substring(1);
@@ -115,7 +118,7 @@ namespace excel_parser
 
             }
 
-            result = (str2.Length > 0) ? str2 : result;
+            result = (str == null) ? str2 : result;
 
             if (result == string.Empty)
                 result = "Неизвестно";
@@ -193,7 +196,7 @@ namespace excel_parser
 
         public static List<string> DB_Reader()
         {
-            string pathBD = @"D:\KursRep\excel_parser\BD.txt";
+            string pathBD = @"C:\Users\deamo\source\repos\excel_parser\BD.txt";
             string[] mass = new string[9] { "1", "2", "3", "4", "5", "6", "7", "8", "9", };
             using (StreamReader reader = new StreamReader(pathBD))
             {
@@ -206,10 +209,10 @@ namespace excel_parser
                     string[] NewLine = lineDB.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
                     DBList.AddRange(NewLine);
                 }
-                //for (int i = 0; i < DBList.Count; i++)
-                //{
-                //    DBList[i] = /*"~" +*/ DBList[i];
-                //}
+                for (int i = 0; i < DBList.Count; i++)
+                {
+                    DBList[i] = "~" + DBList[i];
+                }
                 return DBList;
             }
         }
