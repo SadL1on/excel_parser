@@ -11,7 +11,8 @@ namespace excel_parser
     class Program
     {
         public static string[] arrDis = new string[4] { "~р-он", "~р-н", "~р/н", "~район" };
-        public static string[] arrNP = new string[7] { "~г.", "~с.", "~п.г.т.", "~р.п.", "~п.", "~пос.", "~пгт." };
+        public static string[] arrNP = new string[8] { "~г.", "~с.", "~п.г.т.", "~р.п.", "~п.", "~пос.", "~пгт.", "~пгт" };
+        public static int A = 0;
 
         static void Main(string[] args)
         {
@@ -21,10 +22,9 @@ namespace excel_parser
 
         public static void DataReader(List<string> DBList)
         {
-            var a = 1;
-            string pathData = @"C:\Users\deamo\source\repos\excel_parser\rtt8.txt";
-         //   string pathData = @"C:\Users\deamo\source\repos\excel_parser\test.txt";
-            string pathToSave = @"C:\Users\deamo\source\repos\excel_parser\out8.txt";
+            string pathData = @"D:\KursRep\excel_parser\rtt8.txt";
+          //  string pathData = @"D:\KursRep\excel_parser\test.txt";
+            string pathToSave = @"D:\KursRep\excel_parser\out8.txt";
             string Output = string.Empty;
             var results = new List<string>();
             using (StreamReader sr = new StreamReader(pathData))
@@ -32,15 +32,13 @@ namespace excel_parser
                 string lineData;
                 while ((lineData = sr.ReadLine()) != "~")
                 {
-                    //Output = Shelud(lineData, DBList, ref a);
-
                     var dis = SearchDistrict(lineData);
                     var settl = SearchSettlement(lineData, DBList);
                     var result = dis + " " + settl;
                  //   Console.WriteLine(lineData);
-                    Console.WriteLine();
-                    Console.WriteLine(result);
-                    //Console.ReadLine();
+                   // Console.WriteLine();
+                    Console.WriteLine(result + " " + A);
+               //     Console.ReadLine();
                     results.Add(result);
                 }
             }
@@ -49,7 +47,6 @@ namespace excel_parser
                 foreach (var result in results)
                     sr.WriteLine(result);
             }
-            //TODO write to file
         }
 
         private static string[] LineHandler(string line, char ch = ' ')
@@ -72,6 +69,7 @@ namespace excel_parser
                 var str0 = arrDis.FirstOrDefault(x => x == words[i]);
                 if (str0 != null)
                 {
+                    
                     result = words[i].Substring(1);
 
                     if (str0 == arrDis[0] || str0 == arrDis[1] || str0 == arrDis[2] || str0 == arrDis[3])
@@ -87,7 +85,7 @@ namespace excel_parser
                     break;
                 }
             }
-
+            
             return result;
         }
 
@@ -103,100 +101,38 @@ namespace excel_parser
             //Поиск по наименованию из БД DBList
             for(int i = 0; i < wordsDB.Length; i++)
             {
-                str2 = DBList.FirstOrDefault(x => x == wordsDB[i]);
+                str2 = DBList.FirstOrDefault(x => x == wordsDB[i]);              
                 if (str2 == null) str2 = string.Empty;
+                else { str2 = str2.Substring(1); }
             }
                         
             for (int i = 0; i < words.Length; i++)
             {
                 str = arrNP.FirstOrDefault(x => words[i].Contains(x));
-                if (str != null)
+                if (str != null && words[i].Length > 4)
                 {
                     result = words[i].Substring(1);
+                    try
+                    {
+                        if (words[i + 1].Substring(1).Take(1).All(Char.IsUpper) && words[i + 1].Substring(2).Take(1).All(Char.IsLower))
+                            result = words[i].Substring(1) + " " + words[i + 1].Substring(1);
+                    }
+                    catch { break; }
                     break;
                 }
-
             }
 
             result = (str == null) ? str2 : result;
 
             if (result == string.Empty)
                 result = "Неизвестно";
-
-            return result;
-        }
-
-
-        public static string Shelud(string line, List<string> DBList, ref int a)
-        {
-            var j = 0;
-            var result = string.Empty;
-            string[] words = line.Split(new char[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries);
-
-            for (int i = 0; i < words.Length; i++)
-            {
-                words[i] = "~" + words[i];
-            }
-
-            for (int i = 0; i < words.Length; i++)
-            {
-                // Console.WriteLine(words[i]);
-                //Поиск по элементу из массива arr
-                var str = arrNP.FirstOrDefault(x => words[i].Contains(x));
-                var str0 = arrDis.FirstOrDefault(x => x == words[i]);
-                if (str0 != null || str != null)
-                {
-                    result = words[i].Substring(1);
-                    if (str != null)
-                    {
-                       try { if (words[i + 1].Substring(1).Take(1).All(Char.IsUpper)) { result = result + " " + words[i + 1].Substring(1); } }
-                        catch { break; }
-                    }
-                            
-                    if (str0 == arrDis[0] || str0 == arrDis[1] || str0 == arrDis[2] || str0 == arrDis[3])
-                    {
-                        result = words[i - 1].Substring(1) + " " + result + " " + words[i + 1].Substring(1);
-
-                        try { if (words[i + 2].Substring(1).Take(1).All(Char.IsUpper) && words[i + 2].Substring(2).Take(1).All(Char.IsLower)) { result = result + " " + words[i + 2].Substring(1); } }
-                        catch { break; }
-                    }
-                    //  Console.WriteLine("!!!!!!!");
-                    break;
-                }
-
-                //Поиск по наименованию из БД DBList
-                else
-                {
-                    var str2 = DBList.FirstOrDefault(x => x == words[i]);
-                    if (str2 == "~и")
-                        continue;
-                    if (str2 != null)
-                    {
-                        result = words[i].Substring(1);
-                        try
-                        {
-                            if (Char.IsUpper(words[i + 1][1])) ;
-                            if (words[i + 1].Substring(1).Take(1).All(Char.IsUpper)) { result = result + " " + words[i + 1].Substring(1); }
-                        }
-                        catch { break; }
-                        break;
-                        //  Console.WriteLine("!!!");                        
-                    }
-                }
-
-                result = "Неизвестно";
-            }
-            // Console.WriteLine()
-
-            Console.WriteLine(result + " " + a);
-            a++;
-            Console.ReadLine();
+            A++;
             return result;
         }
 
         public static List<string> DB_Reader()
         {
-            string pathBD = @"C:\Users\deamo\source\repos\excel_parser\BD.txt";
+            string pathBD = @"D:\KursRep\excel_parser\BD.txt";
             string[] mass = new string[9] { "1", "2", "3", "4", "5", "6", "7", "8", "9", };
             using (StreamReader reader = new StreamReader(pathBD))
             {
@@ -211,7 +147,7 @@ namespace excel_parser
                 }
                 for (int i = 0; i < DBList.Count; i++)
                 {
-                    DBList[i] = "~" + DBList[i];
+                    DBList[i] = "~" + DBList[i];                 
                 }
                 return DBList;
             }
